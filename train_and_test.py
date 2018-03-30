@@ -1,32 +1,34 @@
 from __future__ import print_function
 import matplotlib
 matplotlib.use('Agg')
-import torch
 from torch.utils.data import DataLoader
 from data.action_data import ucf_50
-from model.cnn import c2d_alexnet, c2d_vgg19
+from model.cnn import *
 from solver.common import common_solver
 from config.cnn import config
 from utils.visualize import *
-from torchvision import models
-from torch import nn
 
 
 # loading configuration
 cfg = config()
 if cfg.use_gpu:
-    torch.cuda.manual_seed(cfg.seed)
+    torch.cuda.manual_seed_all(cfg.seed)
+    torch.backends.cudnn.deterministic = True
 else:
     torch.manual_seed(cfg.seed)
 
     
 # loading dataset
 image_ready = 1
-train_loader = DataLoader(ucf_50(0, 227, image_ready), cfg.train_batch_size, True)
-val_loader = DataLoader(ucf_50(1, 227, image_ready), cfg.val_batch_size, True)
+train_loader = DataLoader(ucf_50(0, 224, image_ready), cfg.train_batch_size, True)
+val_loader = DataLoader(ucf_50(1, 224, image_ready), cfg.val_batch_size, True)
 
 # loading net
-model = c2d_alexnet()
+# model = c2d_alexnet()
+model = c2d_vgg16()
+# model = c2d_vgg16_avg()
+# model = c2d_googlenet_v1()
+# model = c2d_googlenet_v2()
 if cfg.use_gpu:
     model.cuda()
 

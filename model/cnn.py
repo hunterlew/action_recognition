@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
@@ -38,19 +39,19 @@ class c2d_alexnet(nn.Module):
 
         x = x.view(-1, 9216)
         x = F.relu(self.fc1_bn(self.fc1(x)))
-        x = F.dropout(x, p=0.5)
+        x = F.dropout(x, p=0.5, training=self.training)
         # print(x.shape)
         x = F.relu(self.fc2_bn(self.fc2(x)))
-        x = F.dropout(x, p=0.5)
+        x = F.dropout(x, p=0.5, training=self.training)
         # print(x.shape)
         x = self.fc3(x)
         # print(x.shape)
-        return F.log_softmax(x)
+        return F.log_softmax(x, dim=1)
 
 
-class c2d_vgg19(nn.Module):
+class c2d_vgg16(nn.Module):
     def __init__(self):
-        super(c2d_vgg19, self).__init__()
+        super(c2d_vgg16, self).__init__()
         self.conv1_a = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
         self.conv1_b = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         self.conv2_a = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
@@ -64,7 +65,7 @@ class c2d_vgg19(nn.Module):
         self.conv5_a = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.conv5_b = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.conv5_c = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
-        self.fc1 = nn.Linear(12544, 2048)  # 7*7*512 = 25088
+        self.fc1 = nn.Linear(25088, 2048)  # 7*7*512 = 25088
         self.fc2 = nn.Linear(2048, 2048)
         self.fc3 = nn.Linear(2048, 50)
         self.conv1_a_bn = nn.BatchNorm2d(64)
@@ -110,11 +111,245 @@ class c2d_vgg19(nn.Module):
 
         x = x.view(-1, 25088)
         x = F.relu(self.fc1_bn(self.fc1(x)))
-        x = F.dropout(x, p=0.5)
+        x = F.dropout(x, p=0.5, training=self.training)
         # print(x.shape)
         x = F.relu(self.fc2_bn(self.fc2(x)))
-        x = F.dropout(x, p=0.5)
+        x = F.dropout(x, p=0.5, training=self.training)
         # print(x.shape)
         x = self.fc3(x)
         # print(x.shape)
-        return F.log_softmax(x)
+        return F.log_softmax(x, dim=1)
+
+
+class c2d_vgg16_avg(nn.Module):
+    def __init__(self):
+        super(c2d_vgg16_avg, self).__init__()
+        self.conv1_a = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
+        self.conv1_b = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.conv2_a = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv2_b = nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1)
+        self.conv3_a = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+        self.conv3_b = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.conv3_c = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.conv4_a = nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1)
+        self.conv4_b = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
+        self.conv4_c = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
+        self.conv5_a = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
+        self.conv5_b = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
+        self.conv5_c = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
+        self.fc = nn.Linear(512, 50)
+        self.conv1_a_bn = nn.BatchNorm2d(64)
+        self.conv1_b_bn = nn.BatchNorm2d(64)
+        self.conv2_a_bn = nn.BatchNorm2d(128)
+        self.conv2_b_bn = nn.BatchNorm2d(128)
+        self.conv3_a_bn = nn.BatchNorm2d(256)
+        self.conv3_b_bn = nn.BatchNorm2d(256)
+        self.conv3_c_bn = nn.BatchNorm2d(256)
+        self.conv4_a_bn = nn.BatchNorm2d(512)
+        self.conv4_b_bn = nn.BatchNorm2d(512)
+        self.conv4_c_bn = nn.BatchNorm2d(512)
+        self.conv5_a_bn = nn.BatchNorm2d(512)
+        self.conv5_b_bn = nn.BatchNorm2d(512)
+        self.conv5_c_bn = nn.BatchNorm2d(512)
+
+    def forward(self, x):
+        x = F.relu(self.conv1_a_bn(self.conv1_a(x)))
+        x = F.relu(self.conv1_b_bn(self.conv1_b(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv2_a_bn(self.conv2_a(x)))
+        x = F.relu(self.conv2_b_bn(self.conv2_b(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv3_a_bn(self.conv3_a(x)))
+        x = F.relu(self.conv3_b_bn(self.conv3_b(x)))
+        x = F.relu(self.conv3_c_bn(self.conv3_c(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv4_a_bn(self.conv4_a(x)))
+        x = F.relu(self.conv4_b_bn(self.conv4_b(x)))
+        x = F.relu(self.conv4_c_bn(self.conv4_c(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv5_a_bn(self.conv5_a(x)))
+        x = F.relu(self.conv5_b_bn(self.conv5_b(x)))
+        x = F.relu(self.conv5_c_bn(self.conv5_c(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 512)
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.fc(x)
+        # print(x.shape)
+        return F.log_softmax(x, dim=1)
+
+
+class inception_v1(nn.Module):
+    def __init__(self, input, a, b_1, b, c_1, c, d):
+        super(inception_v1, self).__init__()
+        self.conv_a = nn.Conv2d(input, a, kernel_size=1, stride=1, padding=0)
+        self.conv_b_1 = nn.Conv2d(input, b_1, kernel_size=1, stride=1, padding=0)
+        self.conv_b_2 = nn.Conv2d(b_1, b, kernel_size=3, stride=1, padding=1)
+        self.conv_c_1 = nn.Conv2d(input, c_1, kernel_size=1, stride=1, padding=0)
+        self.conv_c_2 = nn.Conv2d(c_1, c, kernel_size=5, stride=1, padding=2)
+        self.conv_d = nn.Conv2d(input, d, kernel_size=1, stride=1, padding=0)
+        self.conv_a_bn = nn.BatchNorm2d(a)
+        self.conv_b_1_bn = nn.BatchNorm2d(b_1)
+        self.conv_b_2_bn = nn.BatchNorm2d(b)
+        self.conv_c_1_bn = nn.BatchNorm2d(c_1)
+        self.conv_c_2_bn = nn.BatchNorm2d(c)
+        self.conv_d_bn = nn.BatchNorm2d(d)
+        self.output = a + b + c + d
+
+    def forward(self, x):
+        x_a = F.relu(self.conv_a_bn(self.conv_a(x)))
+        x_b = F.relu(self.conv_b_1_bn(self.conv_b_1(x)))
+        x_b = F.relu(self.conv_b_2_bn(self.conv_b_2(x_b)))
+        x_c = F.relu(self.conv_c_1_bn(self.conv_c_1(x)))
+        x_c = F.relu(self.conv_c_2_bn(self.conv_c_2(x_c)))
+        x_d = F.relu(self.conv_d_bn(self.conv_d(x)))
+        x_d = F.max_pool2d(x_d, 3, stride=1, padding=1)
+        x = torch.cat([x_a, x_b, x_c, x_d], dim=1)
+        assert x.shape[1] == self.output
+        return x
+
+
+class c2d_googlenet_v1(nn.Module):
+    def __init__(self):
+        super(c2d_googlenet_v1, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
+        self.conv3 = nn.Conv2d(64, 192, kernel_size=3, stride=1, padding=1)
+
+        self.conv4_5 = inception_v1(192, 64, 96, 128, 16, 32, 32)
+        self.conv6_7 = inception_v1(256, 128, 128, 192, 32, 96, 64)
+
+        self.conv8_9 = inception_v1(480, 192, 96, 208, 16, 48, 64)
+        self.conv10_11= inception_v1(512, 160, 112, 224, 24, 64, 64)
+        self.conv12_13 = inception_v1(512, 128, 128, 256, 24, 64, 64)
+        self.conv14_15 = inception_v1(512, 112, 144, 288, 32, 64, 64)
+        self.conv16_17 = inception_v1(528, 256, 160, 320, 32, 128, 128)
+
+        self.conv18_19 = inception_v1(832, 256, 160, 320, 32, 128, 128)
+        self.conv20_21 = inception_v1(832, 384, 192, 384, 48, 128, 128)
+
+        self.fc = nn.Linear(1024, 50)
+
+        self.conv1_bn = nn.BatchNorm2d(64)
+        self.conv2_bn = nn.BatchNorm2d(64)
+        self.conv3_bn = nn.BatchNorm2d(192)
+
+    def forward(self, x):
+        x = F.relu(self.conv1_bn(self.conv1(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv2_bn(self.conv2(x)))
+        x = F.relu(self.conv3_bn(self.conv3(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv4_5(x)
+        x = self.conv6_7(x)
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv8_9(x)
+        x = self.conv10_11(x)
+        x = self.conv12_13(x)
+        x = self.conv14_15(x)
+        x = self.conv16_17(x)
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv18_19(x)
+        x = self.conv20_21(x)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 1024)
+        x = F.dropout(x, p=0.4, training=self.training)
+        x = self.fc(x)
+        # print(x.shape)
+        return F.log_softmax(x, dim=1)
+
+
+class inception_v2(nn.Module):
+    def __init__(self, input, a, b_1, b, c_1, c, d):
+        super(inception_v2, self).__init__()
+        self.conv_a = nn.Conv2d(input, a, kernel_size=1, stride=1, padding=0)
+        self.conv_b_1 = nn.Conv2d(input, b_1, kernel_size=1, stride=1, padding=0)
+        self.conv_b_2 = nn.Conv2d(b_1, b, kernel_size=3, stride=1, padding=1)
+        self.conv_c_1 = nn.Conv2d(input, c_1, kernel_size=1, stride=1, padding=0)
+        self.conv_c_2 = nn.Conv2d(c_1, c, kernel_size=3, stride=1, padding=1)
+        self.conv_c_3 = nn.Conv2d(c, c, kernel_size=3, stride=1, padding=1)
+        self.conv_d = nn.Conv2d(input, d, kernel_size=1, stride=1, padding=0)
+        self.conv_a_bn = nn.BatchNorm2d(a)
+        self.conv_b_1_bn = nn.BatchNorm2d(b_1)
+        self.conv_b_2_bn = nn.BatchNorm2d(b)
+        self.conv_c_1_bn = nn.BatchNorm2d(c_1)
+        self.conv_c_2_bn = nn.BatchNorm2d(c)
+        self.conv_c_3_bn = nn.BatchNorm2d(c)
+        self.conv_d_bn = nn.BatchNorm2d(d)
+        self.output = a + b + c + d
+
+    def forward(self, x):
+        x_a = F.relu(self.conv_a_bn(self.conv_a(x)))
+        x_b = F.relu(self.conv_b_1_bn(self.conv_b_1(x)))
+        x_b = F.relu(self.conv_b_2_bn(self.conv_b_2(x_b)))
+        x_c = F.relu(self.conv_c_1_bn(self.conv_c_1(x)))
+        x_c = F.relu(self.conv_c_2_bn(self.conv_c_2(x_c)))
+        x_c = F.relu(self.conv_c_3_bn(self.conv_c_3(x_c)))
+        x_d = F.relu(self.conv_d_bn(self.conv_d(x)))
+        x_d = F.max_pool2d(x_d, 3, stride=1, padding=1)
+        x = torch.cat([x_a, x_b, x_c, x_d], dim=1)
+        assert x.shape[1] == self.output
+        return x
+
+
+class c2d_googlenet_v2(nn.Module):
+    def __init__(self):
+        super(c2d_googlenet_v2, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
+        self.conv3 = nn.Conv2d(64, 192, kernel_size=3, stride=1, padding=1)
+
+        self.conv4_5 = inception_v1(192, 64, 96, 128, 16, 32, 32)
+        self.conv6_7 = inception_v1(256, 128, 128, 192, 32, 96, 64)
+
+        self.conv8_9 = inception_v1(480, 192, 96, 208, 16, 48, 64)
+        self.conv10_11= inception_v1(512, 160, 112, 224, 24, 64, 64)
+        self.conv12_13 = inception_v1(512, 128, 128, 256, 24, 64, 64)
+        self.conv14_15 = inception_v1(512, 112, 144, 288, 32, 64, 64)
+        self.conv16_17 = inception_v1(528, 256, 160, 320, 32, 128, 128)
+
+        self.conv18_19 = inception_v1(832, 256, 160, 320, 32, 128, 128)
+        self.conv20_21 = inception_v1(832, 384, 192, 384, 48, 128, 128)
+
+        self.fc = nn.Linear(1024, 50)
+
+        self.conv1_bn = nn.BatchNorm2d(64)
+        self.conv2_bn = nn.BatchNorm2d(64)
+        self.conv3_bn = nn.BatchNorm2d(192)
+
+    def forward(self, x):
+        x = F.relu(self.conv1_bn(self.conv1(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = F.relu(self.conv2_bn(self.conv2(x)))
+        x = F.relu(self.conv3_bn(self.conv3(x)))
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv4_5(x)
+        x = self.conv6_7(x)
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv8_9(x)
+        x = self.conv10_11(x)
+        x = self.conv12_13(x)
+        x = self.conv14_15(x)
+        x = self.conv16_17(x)
+        x = F.max_pool2d(x, 2)
+        # print(x.shape)
+        x = self.conv18_19(x)
+        x = self.conv20_21(x)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 1024)
+        x = F.dropout(x, p=0.4, training=self.training)
+        x = self.fc(x)
+        # print(x.shape)
+        return F.log_softmax(x, dim=1)

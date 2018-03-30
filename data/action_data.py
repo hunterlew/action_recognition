@@ -21,11 +21,11 @@ class ucf_50(data.Dataset):
             assert len(self.imgs) == len(self.labels)
         else:
             self.imgs, self.labels = self.extract_single_clip(flag)
-        self.transform = transforms.Compose([transforms.Resize(size),
+        self.transform = transforms.Compose([transforms.Scale(size),
                                              transforms.RandomCrop(size),
                                              transforms.RandomHorizontalFlip(),
                                              transforms.ToTensor(),
-                                             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])])
+                                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
     def __len__(self):
         # return the number of training or testing samples
@@ -45,14 +45,14 @@ class ucf_50(data.Dataset):
         if not os.path.exists(result_path):
             os.mkdir(result_path)
         path = data_folder + '/../download/UCF50/'
+        label_cnt = 0
         for fn1 in os.listdir(path):
-            label_cnt = 0
             current_path = path + fn1 + '/'
             if not os.path.exists(result_path + fn1):
                 os.mkdir(result_path + fn1)
             for fn2 in os.listdir(current_path):
-                if '.avi' in fn2 and ((not flag and (int(fn2[-10]) * 10 + int(fn2[-9]) > 8))
-                or (flag and (int(fn2[-10]) * 10 + int(fn2[-9]) <= 8))):
+                if '.avi' in fn2 and ((not flag and (int(fn2[-10]) * 10 + int(fn2[-9]) > 1))
+                or (flag and (int(fn2[-10]) * 10 + int(fn2[-9]) <= 1))):
                     cap = cv2.VideoCapture(current_path + fn2)
                     # frames_width = cap.get(3)
                     # frames_height = cap.get(4)
@@ -74,5 +74,6 @@ class ucf_50(data.Dataset):
                     cap.release()
                     print('processing ' + fn2)
                 # input()
+            label_cnt += 1
         assert len(imgs) == len(labels)
         return imgs, labels
