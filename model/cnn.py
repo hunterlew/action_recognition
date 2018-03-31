@@ -207,8 +207,8 @@ class inception_v1(nn.Module):
         x_b = F.relu(self.conv_b_2_bn(self.conv_b_2(x_b)))
         x_c = F.relu(self.conv_c_1_bn(self.conv_c_1(x)))
         x_c = F.relu(self.conv_c_2_bn(self.conv_c_2(x_c)))
-        x_d = F.relu(self.conv_d_bn(self.conv_d(x)))
-        x_d = F.max_pool2d(x_d, 3, stride=1, padding=1)
+        x_d = F.max_pool2d(x, 3, stride=1, padding=1)
+        x_d = F.relu(self.conv_d_bn(self.conv_d(x_d)))
         x = torch.cat([x_a, x_b, x_c, x_d], dim=1)
         assert x.shape[1] == self.output
         return x
@@ -294,8 +294,8 @@ class inception_v2(nn.Module):
         x_c = F.relu(self.conv_c_1_bn(self.conv_c_1(x)))
         x_c = F.relu(self.conv_c_2_bn(self.conv_c_2(x_c)))
         x_c = F.relu(self.conv_c_3_bn(self.conv_c_3(x_c)))
-        x_d = F.relu(self.conv_d_bn(self.conv_d(x)))
-        x_d = F.max_pool2d(x_d, 3, stride=1, padding=1)
+        x_d = F.max_pool2d(x, 3, stride=1, padding=1)
+        x_d = F.relu(self.conv_d_bn(self.conv_d(x_d)))
         x = torch.cat([x_a, x_b, x_c, x_d], dim=1)
         assert x.shape[1] == self.output
         return x
@@ -308,17 +308,17 @@ class c2d_googlenet_v2(nn.Module):
         self.conv2 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
         self.conv3 = nn.Conv2d(64, 192, kernel_size=3, stride=1, padding=1)
 
-        self.conv4_5 = inception_v1(192, 64, 96, 128, 16, 32, 32)
-        self.conv6_7 = inception_v1(256, 128, 128, 192, 32, 96, 64)
+        self.conv4_5 = inception_v2(192, 64, 96, 128, 16, 32, 32)
+        self.conv6_7 = inception_v2(256, 128, 128, 192, 32, 96, 64)
 
-        self.conv8_9 = inception_v1(480, 192, 96, 208, 16, 48, 64)
-        self.conv10_11= inception_v1(512, 160, 112, 224, 24, 64, 64)
-        self.conv12_13 = inception_v1(512, 128, 128, 256, 24, 64, 64)
-        self.conv14_15 = inception_v1(512, 112, 144, 288, 32, 64, 64)
-        self.conv16_17 = inception_v1(528, 256, 160, 320, 32, 128, 128)
+        self.conv8_9 = inception_v2(480, 192, 96, 208, 16, 48, 64)
+        self.conv10_11= inception_v2(512, 160, 112, 224, 24, 64, 64)
+        self.conv12_13 = inception_v2(512, 128, 128, 256, 24, 64, 64)
+        self.conv14_15 = inception_v2(512, 112, 144, 288, 32, 64, 64)
+        self.conv16_17 = inception_v2(528, 256, 160, 320, 32, 128, 128)
 
-        self.conv18_19 = inception_v1(832, 256, 160, 320, 32, 128, 128)
-        self.conv20_21 = inception_v1(832, 384, 192, 384, 48, 128, 128)
+        self.conv18_19 = inception_v2(832, 256, 160, 320, 32, 128, 128)
+        self.conv20_21 = inception_v2(832, 384, 192, 384, 48, 128, 128)
 
         self.fc = nn.Linear(1024, 50)
 

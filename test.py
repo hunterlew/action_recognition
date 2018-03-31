@@ -1,16 +1,17 @@
 import torch
 from torch.autograd import Variable
 from torchvision import transforms
-from model.cnn import c2d_alexnet
+from model.cnn import *
 import os
 from PIL import Image
 
-path = 'save/1-frame-c2d-alexnet/net-epoch-13.pkl'
-model = c2d_alexnet().cuda()
+torch.cuda.set_device(1)
+path = 'save/1-frame-c2d-vgg_avg/net-epoch-25.pkl'
+model = c2d_vgg16_avg().cuda()
 model.load_state_dict(torch.load(path))
 model.eval()
-transform = transforms.Compose([transforms.Scale(227),
-                                transforms.RandomCrop(227),
+transform = transforms.Compose([transforms.Scale(224),
+                                transforms.RandomCrop(224),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
@@ -28,16 +29,16 @@ for fn1 in os.listdir(video_path):
     for fn2 in os.listdir(current_path):
         clip_sum_cnt += 1
         crop_voting_list = [0] * 50
-        data_1 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_2 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_3 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_4 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_5 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_6 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_7 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_8 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_9 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_10 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_1 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_2 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_3 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_4 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_5 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_6 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_7 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_8 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_9 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
+        data_10 = transform(Image.open(current_path + fn2)).view(1, 3, 224, 224)
         data = torch.cat([data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, data_10], dim=0)
         data = Variable(data.cuda())
         output = model(data)

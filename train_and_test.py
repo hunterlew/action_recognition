@@ -12,6 +12,7 @@ from utils.visualize import *
 # loading configuration
 cfg = config()
 if cfg.use_gpu:
+    torch.cuda.set_device(1)
     torch.cuda.manual_seed_all(cfg.seed)
     torch.backends.cudnn.deterministic = True
 else:
@@ -25,10 +26,10 @@ val_loader = DataLoader(ucf_50(1, 224, image_ready), cfg.val_batch_size, True)
 
 # loading net
 # model = c2d_alexnet()
-model = c2d_vgg16()
+# model = c2d_vgg16()
 # model = c2d_vgg16_avg()
 # model = c2d_googlenet_v1()
-# model = c2d_googlenet_v2()
+model = c2d_googlenet_v2()
 if cfg.use_gpu:
     model.cuda()
 
