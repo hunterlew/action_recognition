@@ -28,6 +28,12 @@ I use 'Leave-one-group-out-cross-validation' following the suggestions by UCF50.
 
 Date		Model		Clip@Hit(%)	Video@Hit(%)
 
-20180330	alexnet		50.25		58.00%
+20180330	alexnet		50.25		58.00
 
+20180331	vgg16		49.69		56.00
 
+20180331	vgg16_avg	62.52		68.00
+
+20180331	google_v1	55.45		60.00
+
+20180331	google_v2	55.95		60.00
