@@ -7,7 +7,7 @@ from torch.utils import data
 
 # load dataset
 class ucf_50(data.Dataset):
-    def __init__(self, flag=0, size=224, image_ready=0):  # 0-train, 1-val
+    def __init__(self, flag=0, scale=256, size=224, image_ready=0):  # 0-train, 1-val
         if image_ready:
             path = 'data/train/' if not flag else 'data/val/'
             label_cnt = 0
@@ -21,7 +21,7 @@ class ucf_50(data.Dataset):
             assert len(self.imgs) == len(self.labels)
         else:
             self.imgs, self.labels = self.extract_single_clip(flag)
-        self.transform = transforms.Compose([transforms.Scale(size),
+        self.transform = transforms.Compose([transforms.Scale(scale),
                                              transforms.RandomCrop(size),
                                              transforms.RandomHorizontalFlip(),
                                              transforms.ToTensor(),

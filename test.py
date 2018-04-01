@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import torch
 from torch.autograd import Variable
 from torchvision import transforms
@@ -5,12 +7,11 @@ from model.cnn import *
 import os
 from PIL import Image
 
-torch.cuda.set_device(1)
-path = 'save/1-frame-c2d-vgg_avg/net-epoch-25.pkl'
-model = c2d_vgg16_avg().cuda()
+path = 'save/1-frame-c2d-vgg16/net-epoch-10.pkl'
+model = c2d_vgg16().cuda()
 model.load_state_dict(torch.load(path))
 model.eval()
-transform = transforms.Compose([transforms.Scale(224),
+transform = transforms.Compose([transforms.Scale(256),
                                 transforms.RandomCrop(224),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),

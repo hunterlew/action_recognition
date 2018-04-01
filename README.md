@@ -26,14 +26,8 @@ Validation
 ----------
 I use 'Leave-one-group-out-cross-validation' following the suggestions by UCF50. For robustness, I test 10 crops with the sampled frame for the optim result. Here shows clip@hit and video@hit results. Details can be found in test.py.
 
-Date		Model		Clip@Hit(%)	Video@Hit(%)
+Date            Model            Clip@Hit(%)            video@Hit(%)
 
-20180330	alexnet		50.25		58.00
+20180401        alexnet          53.84                  58.00
 
-20180331	vgg16		49.69		56.00
-
-20180331	vgg16_avg	62.52		68.00
-
-20180331	google_v1	55.45		60.00
-
-20180331	google_v2	55.95		60.00
+20180401        vgg16            65.86                  72.00
