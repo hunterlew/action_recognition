@@ -7,8 +7,8 @@ from model.cnn import *
 import os
 from PIL import Image
 
-path = 'save/1-frame-c2d-vgg16/net-epoch-10.pkl'
-model = c2d_vgg16().cuda()
+path = 'save/1-frame-c2d-res18/net-epoch-14.pkl'
+model = c2d_resnet_18().cuda()
 model.load_state_dict(torch.load(path))
 model.eval()
 transform = transforms.Compose([transforms.Scale(256),

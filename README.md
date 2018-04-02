@@ -31,3 +31,10 @@ Date            Model            Clip@Hit(%)            video@Hit(%)
 20180401        alexnet          53.84                  58.00
 
 20180401        vgg16            65.86                  72.00
+
+20180402        googlenet        59.67                  64.00
+
+20180402        googlenet_v3     60.59                  66.00
+
+20180402        res18            60.29                  64.00
+

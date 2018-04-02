@@ -295,54 +295,44 @@ class inception_v3_exp(nn.Module):
 class c2d_googlenet_v3(nn.Module):
     def __init__(self):
         super(c2d_googlenet_v3, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=0)  # 299 -> 149
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=0)  # 149 -> 147
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)  # 147 -> 147 -> pool -> 73
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1)
+        self.conv4 = nn.Conv2d(64, 64, kernel_size=1, stride=1, padding=0)
+        self.conv5 = nn.Conv2d(64, 192, kernel_size=3, stride=1, padding=1)
 
-        self.conv4 = nn.Conv2d(64, 80, kernel_size=3, stride=1, padding=0)  # 73 -> 71
-        self.conv5 = nn.Conv2d(80, 192, kernel_size=3, stride=2, padding=0)  # 71 -> 35
-        self.conv6 = nn.Conv2d(192, 288, kernel_size=3, stride=1, padding=1)  # 35 -> 35
+        self.in1_1 = inception(192, 64, 96, 128, 16, 32, 32)
+        self.in1_2 = inception(256, 128, 128, 192, 32, 96, 64)
 
-        self.in1_1 = inception(288, 64, 96, 128, 32, 64, 32)
-        self.in1_2 = inception(288, 64, 96, 128, 32, 64, 32)
-        self.in1_3 = inception(288, 192, 128, 192, 128, 192, 192)
+        self.in2_1 = inception_v3(480, 192, 96, 208, 16, 48, 64)
+        self.in2_2 = inception_v3(512, 160, 112, 224, 24, 64, 64)
+        self.in2_3 = inception_v3(512, 128, 128, 256, 24, 64, 64)
+        self.in2_4 = inception_v3(512, 112, 144, 288, 32, 64, 64)
+        self.in2_5 = inception_v3(528, 256, 160, 320, 32, 128, 128)
 
-        self.in2_1 = inception_v3(768, 192, 128, 192, 128, 192, 192)
-        self.in2_2 = inception_v3(768, 192, 128, 192, 128, 192, 192)
-        self.in2_3 = inception_v3(768, 192, 128, 192, 128, 192, 192)
-        self.in2_4 = inception_v3(768, 192, 128, 192, 128, 192, 192)
-        self.in2_5 = inception_v3(768, 256, 128, 640, 128, 256, 128)
+        self.in3_1 = inception_v3_exp(832, 256, 160, 320, 32, 128, 128)
+        self.in3_2 = inception_v3_exp(1280, 384, 192, 384, 48, 128, 128)
 
-        self.in3_1 = inception_v3_exp(1280, 256, 160, 320, 32, 128, 128)
-        self.in3_2 = inception_v3_exp(1280, 256, 160, 640, 32, 192, 128)
+        self.fc = nn.Linear(1536, 50)
 
-        self.fc = nn.Linear(2048, 50)
-
-        self.conv1_bn = nn.BatchNorm2d(32)
-        self.conv2_bn = nn.BatchNorm2d(32)
+        self.conv1_bn = nn.BatchNorm2d(64)
+        self.conv2_bn = nn.BatchNorm2d(64)
         self.conv3_bn = nn.BatchNorm2d(64)
-        self.conv4_bn = nn.BatchNorm2d(80)
+        self.conv4_bn = nn.BatchNorm2d(64)
         self.conv5_bn = nn.BatchNorm2d(192)
-        self.conv6_bn = nn.BatchNorm2d(288)
 
     def forward(self, x):
         x = F.relu(self.conv1_bn(self.conv1(x)))
-        # print(x.shape)
         x = F.relu(self.conv2_bn(self.conv2(x)))
-        # print(x.shape)
         x = F.relu(self.conv3_bn(self.conv3(x)))
-        # print(x.shape)
-        x = F.max_pool2d(x, 3, stride=2)
+        x = F.max_pool2d(x, 3, stride=2, padding=1)
         # print(x.shape)
         x = F.relu(self.conv4_bn(self.conv4(x)))
-        # print(x.shape)
         x = F.relu(self.conv5_bn(self.conv5(x)))
-        # print(x.shape)
-        x = F.relu(self.conv6_bn(self.conv6(x)))
+        x = F.max_pool2d(x, 3, stride=2, padding=1)
         # print(x.shape)
         x = self.in1_1(x)
         x = self.in1_2(x)
-        x = self.in1_3(x)
         x = F.max_pool2d(x, 3, stride=2, padding=1)
         # print(x.shape)
         x = self.in2_1(x)
@@ -354,9 +344,8 @@ class c2d_googlenet_v3(nn.Module):
         # print(x.shape)
         x = self.in3_1(x)
         x = self.in3_2(x)
-        # print(x.shape)
-        x = F.avg_pool2d(x, 8)
-        x = x.view(-1, 2048)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 1536)
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.fc(x)
         # print(x.shape)
@@ -386,9 +375,9 @@ class res_block(nn.Module):
         return x
 
 
-class resnet_18(nn.Module):
+class c2d_resnet_18(nn.Module):
     def __init__(self):
-        super(resnet_18, self).__init__()
+        super(c2d_resnet_18, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
         self.conv2_1 = res_block(64, 64)
         self.conv2_2 = res_block(64, 64)
@@ -416,6 +405,127 @@ class resnet_18(nn.Module):
         # print(x.shape)
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 512)
+        # x = F.dropout(x, p=0.5, training=self.training)
+        x = self.fc(x)
+        # print(x.shape)
+        return F.log_softmax(x, dim=1)
+
+
+class c2d_resnet_34(nn.Module):
+    def __init__(self):
+        super(c2d_resnet_34, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv2_1 = res_block(64, 64)
+        self.conv2_2 = res_block(64, 64)
+        self.conv2_3 = res_block(64, 64)
+        self.conv3_1 = res_block(64, 128, 2)
+        self.conv3_2 = res_block(128, 128)
+        self.conv3_3 = res_block(128, 128)
+        self.conv3_4 = res_block(128, 128)
+        self.conv4_1 = res_block(128, 256, 2)
+        self.conv4_2 = res_block(256, 256)
+        self.conv4_3 = res_block(256, 256)
+        self.conv4_4 = res_block(256, 256)
+        self.conv4_5 = res_block(256, 256)
+        self.conv4_6 = res_block(256, 256)
+        self.conv5_1 = res_block(256, 512, 2)
+        self.conv5_2 = res_block(512, 512)
+        self.conv5_3 = res_block(512, 512)
+        self.fc = nn.Linear(512, 50)
+        self.conv1_bn = nn.BatchNorm2d(64)
+
+    def forward(self, x):
+        x = F.relu(self.conv1_bn(self.conv1(x)))
+        # print(x.shape)
+        x = F.max_pool2d(x, 3, stride=2, padding=1)
+        # print(x.shape)
+        x = self.conv2_3(self.conv2_2(self.conv2_1(x)))
+        # print(x.shape)
+        x = self.conv3_2(self.conv3_1(x))
+        x = self.conv3_4(self.conv3_3(x))
+        # print(x.shape)
+        x = self.conv4_2(self.conv4_1(x))
+        x = self.conv4_4(self.conv4_3(x))
+        x = self.conv4_6(self.conv4_5(x))
+        # print(x.shape)
+        x = self.conv5_3(self.conv5_2(self.conv5_1(x)))
+        # print(x.shape)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 512)
+        # x = F.dropout(x, p=0.5, training=self.training)
+        x = self.fc(x)
+        # print(x.shape)
+        return F.log_softmax(x, dim=1)
+
+
+class res_neck_block(nn.Module):
+    def __init__(self, input, neck, output, stride=1, flag=0):
+        super(res_neck_block, self).__init__()
+        self.conv_1 = nn.Conv2d(input, neck, kernel_size=1, stride=stride, padding=0)
+        self.conv_2 = nn.Conv2d(neck, neck, kernel_size=3, stride=1, padding=1)
+        self.conv_3 = nn.Conv2d(neck, output, kernel_size=1, stride=1, padding=0)
+        self.conv_1_bn = nn.BatchNorm2d(neck)
+        self.conv_2_bn = nn.BatchNorm2d(neck)
+        self.conv_3_bn = nn.BatchNorm2d(output)
+        if (stride == 2) or flag:
+            self.conv_tmp = nn.Conv2d(input, output, kernel_size=1, stride=stride, padding=0)
+            self.conv_tmp_bn = nn.BatchNorm2d(output)
+
+    def forward(self, x):
+        x_1 = F.relu(self.conv_1_bn(self.conv_1(x)))
+        x_2 = F.relu(self.conv_2_bn(self.conv_2(x_1)))
+        x_3 = self.conv_3_bn(self.conv_3(x_2))
+        if x.shape[1] != x_3.shape[1]:
+            x = self.conv_tmp_bn(self.conv_tmp(x))
+        # print(x.shape, x_3.shape)
+        assert x.shape[1] == x_3.shape[1]
+        assert x.shape[2] == x_3.shape[2]
+        assert x.shape[3] == x_3.shape[3]
+        x = F.relu(x_3 + x)
+        return x
+
+
+class c2d_resnet_50(nn.Module):
+    def __init__(self):
+        super(c2d_resnet_50, self).__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv2_1 = res_neck_block(64, 64, 128, 1, 1)
+        self.conv2_2 = res_neck_block(128, 64, 128)
+        self.conv2_3 = res_neck_block(128, 64, 128)
+        self.conv3_1 = res_neck_block(128, 64, 256, 2)
+        self.conv3_2 = res_neck_block(256, 128, 256)
+        self.conv3_3 = res_neck_block(256, 128, 256)
+        self.conv3_4 = res_neck_block(256, 128, 256)
+        self.conv4_1 = res_neck_block(256, 128, 512, 2)
+        self.conv4_2 = res_neck_block(512, 256, 512)
+        self.conv4_3 = res_neck_block(512, 256, 512)
+        self.conv4_4 = res_neck_block(512, 256, 512)
+        self.conv4_5 = res_neck_block(512, 256, 512)
+        self.conv4_6 = res_neck_block(512, 256, 512)
+        self.conv5_1 = res_neck_block(512, 256, 1024, 2)
+        self.conv5_2 = res_neck_block(1024, 512, 1024)
+        self.conv5_3 = res_neck_block(1024, 512, 1024)
+        self.fc = nn.Linear(1024, 50)
+        self.conv1_bn = nn.BatchNorm2d(64)
+
+    def forward(self, x):
+        x = F.relu(self.conv1_bn(self.conv1(x)))
+        # print(x.shape)
+        x = F.max_pool2d(x, 3, stride=2, padding=1)
+        # print(x.shape)
+        x = self.conv2_3(self.conv2_2(self.conv2_1(x)))
+        # print(x.shape)
+        x = self.conv3_2(self.conv3_1(x))
+        x = self.conv3_4(self.conv3_3(x))
+        # print(x.shape)
+        x = self.conv4_2(self.conv4_1(x))
+        x = self.conv4_4(self.conv4_3(x))
+        x = self.conv4_6(self.conv4_5(x))
+        # print(x.shape)
+        x = self.conv5_3(self.conv5_2(self.conv5_1(x)))
+        # print(x.shape)
+        x = F.avg_pool2d(x, 7)
+        x = x.view(-1, 2048)
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.fc(x)
         # print(x.shape)

@@ -13,4 +13,4 @@ class config():
         self.use_gpu = True and torch.cuda.is_available()
         self.seed = 0
         self.display = 20
-        self.name = '1-frame-c2d-vgg19'
+        self.name = '1-frame-c2d-res34'
