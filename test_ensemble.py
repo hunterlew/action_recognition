@@ -7,10 +7,10 @@ from model.cnn import *
 import os
 from PIL import Image
 
-path_1 = 'save/1-frame-c2d-res18-1/net-epoch-20.pkl'
+path_1 = 'save/1-frame-c2d-res18-1/net-epoch-19.pkl'
 path_2 = 'save/1-frame-c2d-res18-2/net-epoch-20.pkl'
-path_3 = 'save/1-frame-c2d-res18-3/net-epoch-20.pkl'
-path_4 = 'save/1-frame-c2d-res18-4/net-epoch-14.pkl'
+path_3 = 'save/1-frame-c2d-res18-3/net-epoch-18.pkl'
+path_4 = 'save/1-frame-c2d-res18-4/net-epoch-20.pkl'
 model_1 = c2d_resnet_18().cuda()
 model_1.load_state_dict(torch.load(path_1))
 model_1.eval()
@@ -24,7 +24,22 @@ model_4 = c2d_resnet_18().cuda()
 model_4.load_state_dict(torch.load(path_4))
 model_4.eval()
 
-transform = transforms.Compose([transforms.Scale(256),
+transform_1 = transforms.Compose([transforms.Scale(256),
+                                transforms.RandomCrop(227),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+transform_2 = transforms.Compose([transforms.Scale(300),
+                                transforms.RandomCrop(227),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+transform_3 = transforms.Compose([transforms.Scale(270),
+                                transforms.RandomCrop(227),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.ToTensor(),
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+transform_4 = transforms.Compose([transforms.Scale(240),
                                 transforms.RandomCrop(227),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
@@ -44,19 +59,18 @@ for fn1 in os.listdir(video_path):
         clip_sum_cnt += 1
 
         # 10-crop
-        data_1 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_2 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_3 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_4 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_5 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_6 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_7 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_8 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_9 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
-        data_10 = transform(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_1 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_2 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_3 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_4 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_5 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_6 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_7 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_8 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_9 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_10 = transform_1(Image.open(current_path + fn2)).view(1, 3, 227, 227)
         data = torch.cat([data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, data_10], dim=0)
         data = Variable(data.cuda())
-
         # 4-resnet-ensemble
         crop_voting_list = [0] * 50
         output = model_1(data)
@@ -65,6 +79,18 @@ for fn1 in os.listdir(video_path):
             crop_voting_list[int(i)] += 1
         pred_clip_1 = crop_voting_list.index(max(crop_voting_list))
 
+        data_1 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_2 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_3 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_4 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_5 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_6 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_7 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_8 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_9 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_10 = transform_2(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data = torch.cat([data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, data_10], dim=0)
+        data = Variable(data.cuda())
         crop_voting_list = [0] * 50
         output = model_2(data)
         pred_clip_2 = (output.data.max(1, keepdim=True)[1]).cpu().numpy()
@@ -72,6 +98,18 @@ for fn1 in os.listdir(video_path):
             crop_voting_list[int(i)] += 1
         pred_clip_2 = crop_voting_list.index(max(crop_voting_list))
 
+        data_1 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_2 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_3 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_4 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_5 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_6 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_7 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_8 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_9 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_10 = transform_3(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data = torch.cat([data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, data_10], dim=0)
+        data = Variable(data.cuda())
         crop_voting_list = [0] * 50
         output = model_3(data)
         pred_clip_3 = (output.data.max(1, keepdim=True)[1]).cpu().numpy()
@@ -79,6 +117,18 @@ for fn1 in os.listdir(video_path):
             crop_voting_list[int(i)] += 1
         pred_clip_3 = crop_voting_list.index(max(crop_voting_list))
 
+        data_1 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_2 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_3 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_4 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_5 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_6 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_7 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_8 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_9 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data_10 = transform_4(Image.open(current_path + fn2)).view(1, 3, 227, 227)
+        data = torch.cat([data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, data_10], dim=0)
+        data = Variable(data.cuda())
         crop_voting_list = [0] * 50
         output = model_4(data)
         pred_clip_4 = (output.data.max(1, keepdim=True)[1]).cpu().numpy()

@@ -21,8 +21,8 @@ else:
     
 # loading dataset
 image_ready = 1
-train_loader = DataLoader(ucf_50(0, 256, 224, image_ready), cfg.train_batch_size, True)
-val_loader = DataLoader(ucf_50(1, 256, 224, image_ready), cfg.val_batch_size, True)
+train_loader = DataLoader(ucf_50(0, 240, 224, image_ready), cfg.train_batch_size, True)
+val_loader = DataLoader(ucf_50(1, 240, 224, image_ready), cfg.val_batch_size, True)
 
 # loading net
 # model = c2d_alexnet()
