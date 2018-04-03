@@ -7,7 +7,7 @@ from model.cnn import *
 import os
 from PIL import Image
 
-path = 'save/1-frame-c2d-res18/net-epoch-14.pkl'
+path = 'save/1-frame-c2d-res18-1/net-epoch-20.pkl'
 model = c2d_resnet_18().cuda()
 model.load_state_dict(torch.load(path))
 model.eval()

@@ -405,7 +405,7 @@ class c2d_resnet_18(nn.Module):
         # print(x.shape)
         x = F.avg_pool2d(x, 7)
         x = x.view(-1, 512)
-        # x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.5, training=self.training)
         x = self.fc(x)
         # print(x.shape)
         return F.log_softmax(x, dim=1)

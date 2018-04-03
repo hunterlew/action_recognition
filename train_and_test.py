@@ -12,7 +12,7 @@ from utils.visualize import *
 # loading configuration
 cfg = config()
 if cfg.use_gpu:
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(3)
     torch.cuda.manual_seed_all(cfg.seed)
     torch.backends.cudnn.deterministic = True
 else:
