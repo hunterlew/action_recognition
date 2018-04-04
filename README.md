@@ -38,6 +38,6 @@ Date            Model            Clip@Hit(%)            video@Hit(%)
 
 20180402        res18            61.90                  66.00
 
-20180403        4_res18s         62.21                  70.00 
+20180403        multicrop_res18         62.21                  70.00 
 
-20180403        4_res18s_v2      63.26                  68.00
+20180403        multicrop_and_multisize_res18      63.26                  68.00
